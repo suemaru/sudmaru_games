@@ -1,0 +1,13 @@
+
+# clawd-ignore (generated / local)
+.DS_Store
+.vscode/
+node_modules/
+.worktrees/
+
+# Remotion renders
+out/*.mp4
+out/**/*.mp4
+
+# Obsidian local state
+.obsidian/workspace.json
