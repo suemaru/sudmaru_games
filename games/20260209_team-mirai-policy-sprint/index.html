@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>DreamCore Game</title>
+
+    <!-- CDN Libraries (必要に応じて追加・削除可) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
+  <script type="module" crossorigin>(function(){const s=document.createElement("link").relList;if(s&&s.supports&&s.supports("modulepreload"))return;for(const o of document.querySelectorAll('link[rel="modulepreload"]'))l(o);new MutationObserver(o=>{for(const r of o)if(r.type==="childList")for(const p of r.addedNodes)p.tagName==="LINK"&&p.rel==="modulepreload"&&l(p)}).observe(document,{childList:!0,subtree:!0});function i(o){const r={};return o.integrity&&(r.integrity=o.integrity),o.referrerPolicy&&(r.referrerPolicy=o.referrerPolicy),o.crossOrigin==="use-credentials"?r.credentials="include":o.crossOrigin==="anonymous"?r.credentials="omit":r.credentials="same-origin",r}function l(o){if(o.ep)return;o.ep=!0;const r=i(o);fetch(o.href,r)}})();const f=1e3/60,S=100,d=[110,200,290],g=510,a=400,c=700,L=45,e={mode:"title",lane:1,score:0,combo:0,life:3,timeLeft:L,entities:[],spawnTimer:0,nextId:1,pulse:0},I=document.getElementById("app");I.innerHTML=`
+<div class="screen">
+  <canvas id="game" width="${a}" height="${c}"></canvas>
+  <div class="hud" id="hud"></div>
+  <button id="start" class="start-btn">政策スプリント開始</button>
+  <p class="hint" id="hint">左右キー / A,D / スワイプで移動・Fで全画面</p>
+</div>
+`;const u=document.getElementById("game"),t=u.getContext("2d"),P=document.getElementById("hud"),m=document.getElementById("start"),b=document.getElementById("hint");function M(){e.mode="playing",e.lane=1,e.score=0,e.combo=0,e.life=3,e.timeLeft=L,e.entities=[],e.spawnTimer=0,e.nextId=1,e.pulse=0,m.style.display="none",b.textContent="市民提案(P)をキャッチ、ノイズ(N)を回避して45秒で高得点を狙おう！"}m.addEventListener("click",M);window.addEventListener("keydown",n=>{(n.key==="ArrowLeft"||n.key.toLowerCase()==="a")&&h(-1),(n.key==="ArrowRight"||n.key.toLowerCase()==="d")&&h(1),n.key.toLowerCase()==="f"&&C(),n.key==="Enter"&&e.mode!=="playing"&&M()});let T=0;u.addEventListener("pointerdown",n=>T=n.clientX);u.addEventListener("pointerup",n=>{const s=n.clientX-T;Math.abs(s)<20||h(s>0?1:-1)});function h(n){e.mode==="playing"&&(e.lane=Math.max(0,Math.min(2,e.lane+n)))}function w(n){if(e.mode!=="playing")return;if(e.timeLeft-=n,e.spawnTimer-=n,e.pulse=Math.max(0,e.pulse-n*2),e.spawnTimer<=0){const i=Math.floor(Math.random()*3),l=Math.random()<.68;e.entities.push({id:e.nextId++,lane:i,y:-30,speed:220+Math.random()*120,type:l?"policy":"noise"}),e.spawnTimer=.35+Math.random()*.3}e.entities.forEach(i=>{i.y+=i.speed*n});const s=[];for(const i of e.entities){if(i.lane===e.lane&&Math.abs(i.y-g)<30){i.type==="policy"?(e.combo+=1,e.score+=100+e.combo*8,e.pulse=.45):(e.combo=0,e.life-=1);continue}if(i.y>c+30){i.type==="policy"&&(e.combo=0);continue}s.push(i)}e.entities=s,(e.life<=0||e.timeLeft<=0)&&(e.mode="gameover",m.style.display="inline-flex",m.textContent="もう一度挑戦",b.textContent=`最終スコア ${Math.floor(e.score)} / Enterでも再開できます`)}function E(){t.clearRect(0,0,a,c);const n=t.createLinearGradient(0,0,0,c);n.addColorStop(0,"#0a1536"),n.addColorStop(1,"#060d20"),t.fillStyle=n,t.fillRect(0,0,a,c);for(let l=0;l<3;l++){const o=d[l];t.strokeStyle="rgba(130,170,255,0.18)",t.lineWidth=2,t.beginPath(),t.moveTo(o,0),t.lineTo(o,c),t.stroke()}for(const l of e.entities){const o=d[l.lane];t.beginPath(),t.fillStyle=l.type==="policy"?"#50e3c2":"#ff6b8a",t.arc(o,l.y,18,0,Math.PI*2),t.fill(),t.fillStyle="#fff",t.font="bold 12px sans-serif",t.textAlign="center",t.fillText(l.type==="policy"?"P":"N",o,l.y+4)}const s=d[e.lane];t.save();const i=1+e.pulse*.25;t.translate(s,g),t.scale(i,i),t.fillStyle="#ffd166",t.beginPath(),t.moveTo(0,-24),t.lineTo(20,20),t.lineTo(-20,20),t.closePath(),t.fill(),t.restore(),P.innerHTML=`
+  <span>Score ${Math.floor(e.score)}</span>
+  <span>Combo ${e.combo}</span>
+  <span>Life ${e.life}</span>
+  <span>Time ${Math.max(0,e.timeLeft).toFixed(1)}s</span>
+  `,e.mode==="title"&&(t.fillStyle="rgba(0,0,0,0.45)",t.fillRect(22,220,a-44,180),t.fillStyle="#eaf2ff",t.textAlign="center",t.font="bold 30px sans-serif",t.fillText("TEAM MIRAI",a/2,280),t.font="bold 22px sans-serif",t.fillText("POLICY SPRINT",a/2,314),t.font="14px sans-serif",t.fillText("提案を拾って、ノイズを避ける",a/2,346))}let x=0,y=0;function v(n){const s=Math.min(S,n-x);for(x=n,y+=s;y>=f;)w(f/1e3),y-=f;E(),requestAnimationFrame(v)}requestAnimationFrame(v);function A(){return JSON.stringify({coordinateSystem:"origin top-left; +x right; +y down",mode:e.mode,player:{lane:e.lane,x:d[e.lane],y:g},entities:e.entities.slice(0,8).map(n=>({lane:n.lane,x:d[n.lane],y:Math.round(n.y),type:n.type})),score:Math.floor(e.score),combo:e.combo,life:e.life,timeLeft:Number(Math.max(0,e.timeLeft).toFixed(2))})}window.render_game_to_text=A;window.advanceTime=n=>{const s=Math.max(1,Math.round(n/f));for(let i=0;i<s;i++)w(f/1e3);E()};async function C(){document.fullscreenElement?await document.exitFullscreen?.():await u.requestFullscreen?.()}document.addEventListener("fullscreenchange",()=>{document.fullscreenElement});</script>
+  <style rel="stylesheet" crossorigin>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:radial-gradient(circle at 50% 0%,#1b2f5e,#070d1f 55%);font-family:"M PLUS Rounded 1c",Hiragino Sans,sans-serif;color:#eaf2ff}#app{min-height:100vh;display:grid;place-items:center;padding:16px}.screen{width:min(95vw,440px);display:grid;gap:10px;justify-items:center}#game{width:100%;max-height:78vh;border-radius:20px;border:1px solid rgba(255,255,255,.2);box-shadow:0 18px 40px #0000006b;touch-action:none}.hud{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.hud span{text-align:center;font-size:12px;background:#ffffff14;border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:6px 4px}.start-btn{border:0;border-radius:999px;padding:10px 18px;background:linear-gradient(135deg,#46d5b6,#2ea6ff);color:#021226;font-weight:700;cursor:pointer}.hint{margin:0;color:#b6cae7;font-size:12px;text-align:center}</style>
+</head>
+
+<body>
+    <div id="app"></div>
+</body>
+
+</html>
